@@ -25,13 +25,13 @@
 			if(this.isArray(obj)){
 				//如果是数组
 				for(; i<len; i++){
-			       if ( false === fn.call(obj[i],i+1) ){break;}
+			       if ( false === fn.call(obj[i], obj[i], i) ){break;}
 			    }
 			}else{
 				//如果是对象
-			     for( i in obj ){
-			        if(false === fn.call(obj[i], i)){break;}
-			     }
+			    for( i in obj ){
+			       if(false === fn.call(obj[i],i+1,obj[i])){break;}
+			    }
 			}
 		}
 	};
@@ -82,6 +82,36 @@
 	 */
 	var urlParse = {};
 
+	/*
+	 * load
+	 */
+	var loader = {
+		imgLoader: function(imgs, cb){
+			setTimeout(function(){
+				var imgsLen = imgs.length;
+				var count = 0;
+				base.each(imgs, function (v_img, i_img){
+					(function (v_img, i_img){
+						var imgItem = document.createElement("img");
+						imgItem.setAttribute("style", "display:none;");
+						imgItem.setAttribute("src", v_img);
+						var imgD = document.body.appendChild(imgItem);
+						imgD.onload = function(){
+							count += 1;
+							cb && cb({
+								"count": count,
+								"length": imgsLen,
+								"img": v_img
+							});
+							imgD.parentNode.removeChild(imgD); 
+						};
+					})(v_img, i_img);
+				});
+			}, 1);
+
+		}
+	};
+
 	/****************************************************************
 	 * public
 	 */
@@ -96,7 +126,9 @@
 		isNumber: regCheck.isNumber,
 		/*browser*/
 		isIos: browser.isIos,
-		isWeiXin: browser.isWeiXin
+		isWeiXin: browser.isWeiXin,
+		/*load*/
+		imgLoader: loader.imgLoader
 	};
 
 	return mTools;
