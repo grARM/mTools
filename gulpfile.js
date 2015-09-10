@@ -4,10 +4,6 @@ var gulp = require('gulp'),
 	jshint = require('gulp-jshint'),
 	uglify = require('gulp-uglify');
 
-// gulp.task('default', function(){
-// 	console.log('this is the default task');
-// });
-
 //压缩，合并 js
 gulp.task('minifyjs', function() {
     return gulp.src('src/*.js')      //需要操作的文件
