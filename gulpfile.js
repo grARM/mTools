@@ -2,6 +2,7 @@ var gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	rename = require('gulp-rename'),
 	jshint = require('gulp-jshint'),
+    rjs = require('gulp-requirejs'),
 	uglify = require('gulp-uglify');
 
 //压缩，合并 js
