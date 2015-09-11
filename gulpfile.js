@@ -2,8 +2,15 @@ var gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	rename = require('gulp-rename'),
 	jshint = require('gulp-jshint'),
-    rjs = require('gulp-requirejs'),
+    //rjs = require('gulp-requirejs'),
 	uglify = require('gulp-uglify');
+
+//语法检查
+gulp.task('jshint', function(){
+    return gulp.src('src/*.js')
+        .pipe(jshint())
+        .pipe(jshint.reporter('default'));
+});
 
 //压缩，合并 js
 gulp.task('minifyjs', function() {
@@ -16,6 +23,6 @@ gulp.task('minifyjs', function() {
 });
 
 //默认命令，在cmd中输入gulp后，执行的就是这个任务(压缩js需要在检查js之后操作)
-gulp.task('default', function() {
+gulp.task('default', ['jshint'], function() {
     gulp.start('minifyjs'); 
 });

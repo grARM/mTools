@@ -19,6 +19,13 @@
 		isArray: function(arr){
 			return Object.prototype.toString.call(arr) === '[object Array]';
 		},
+		isFunction: function(fn){
+			return (fn && typeof fn === "function") || false;
+		},
+		isObject: function(obj){
+			var type = typeof obj;
+    		return type === 'function' || type === 'object' && !!obj;
+		},
 		each: function (obj, fn){
 			var len = obj.length,i = 0;
 
@@ -35,6 +42,7 @@
 			}
 		}
 	};
+
 
 	/*
 	 * 正则相关方法
@@ -103,9 +111,9 @@
 	 */
 	var cookie = {
 		setCookie: function (key, value, expiredays){
-			var exdate=new Date()
+			var exdate=new Date();
 			exdate.setDate(exdate.getDate()+expiredays);
-			document.cookie=key+ "=" +escape(value)+((expiredays==null) ? "" : ";expires="+exdate.toGMTString());
+			document.cookie=key+ "=" +escape(value)+((expiredays === null) ? "" : ";expires="+exdate.toGMTString());
 		},
 		getCookie: function(key){
 			if (document.cookie.length > 0) {
@@ -137,11 +145,13 @@
 						var imgD = document.body.appendChild(imgItem);
 						imgD.onload = function(){
 							count += 1;
-							cb && cb({
-								"count": count,
-								"length": imgsLen,
-								"img": v_img
-							});
+							if(base.isFunction(cb)){
+								cb({
+									"count": count,
+									"length": imgsLen,
+									"img": v_img
+								});
+							}
 							imgD.parentNode.removeChild(imgD); 
 						};
 					})(v_img, i_img);
