@@ -70,10 +70,26 @@
 	 */
 	var browser = {
 		isIos: function(){
-			return navigator.userAgent.indexOf("iPhone")>=0 ? true: false;
+			return (navigator.userAgent.indexOf("iPhone") === -1) ? false: true;
+		},
+		isAndroid: function(){
+			return (window.navigator.userAgent.toLowerCase().indexOf("android") === -1) ? false : true;
+		},
+		isBrowser: function(browserUAName){
+			return (window.navigator.userAgent.toLowerCase().indexOf(browserUAName) === -1) ? false: true;
 		},
 		isWeiXin: function(){
-			return /micromessenger/i.test(navigator.userAgent.toLowerCase());
+			//return /micromessenger/i.test(navigator.userAgent.toLowerCase());
+			return this.isBrowser("micromessenger");
+		},
+		isUC: function(){
+			return this.isBrowser("ucbrowser");
+		},
+		isQQ: function(){
+			return this.isBrowser("mqqbrowser");
+		},
+		isSafari: function(){
+			return this.isBrowser("Safari");
 		}
 	};
 
@@ -149,7 +165,8 @@
 		isNumber: regCheck.isNumber,
 		/*browser*/
 		isIos: browser.isIos,
-		isWeiXin: browser.isWeiXin,
+		isAndroid: browser.isAndroid,
+		Browser: browser,
 		/*cookie*/
 		setCookie: cookie.setCookie,
 		getCookie: cookie.getCookie,
