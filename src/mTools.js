@@ -83,6 +83,29 @@
 	var urlParse = {};
 
 	/*
+	 * cookie
+	 */
+	var cookie = {
+		setCookie: function (key, value, expiredays){
+			var exdate=new Date()
+			exdate.setDate(exdate.getDate()+expiredays);
+			document.cookie=key+ "=" +escape(value)+((expiredays==null) ? "" : ";expires="+exdate.toGMTString());
+		},
+		getCookie: function(key){
+			if (document.cookie.length > 0) {
+			    c_start = document.cookie.indexOf(key + "=");
+			    if (c_start != -1) {
+			        c_start = c_start + key.length + 1;
+			        c_end = document.cookie.indexOf(";", c_start);
+			        if (c_end == -1) c_end = document.cookie.length;
+			        return unescape(document.cookie.substring(c_start, c_end));
+			    }
+			}
+			return "";
+		}
+	};
+
+	/*
 	 * load
 	 */
 	var loader = {
@@ -127,6 +150,9 @@
 		/*browser*/
 		isIos: browser.isIos,
 		isWeiXin: browser.isWeiXin,
+		/*cookie*/
+		setCookie: cookie.setCookie,
+		getCookie: cookie.getCookie,
 		/*load*/
 		imgLoader: loader.imgLoader
 	};
