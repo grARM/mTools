@@ -7,15 +7,18 @@
 		// AMD. Register as an anonymous module.
 		define(factory);
 	} else {
-
+		 
 		// Browser globals
 		mTools = factory();
 	}
 })(function(){
+	var root = this;
+	var previousMTools = root.mTools;
 	/*
 	 * 基础通用方法
 	 */
 	var base = {
+		/*tpye*/
 		isArray: function(arr){
 			return Object.prototype.toString.call(arr) === '[object Array]';
 		},
@@ -25,6 +28,14 @@
 		isObject: function(obj){
 			var type = typeof obj;
     		return type === 'function' || type === 'object' && !!obj;
+		},
+		/*type Change*/
+		toInt: function(value){
+			// return ~~(value);
+			return (value) | 0;
+		},
+		toBool: function(value){
+			return !!(value);
 		},
 		each: function (obj, fn){
 			var len = obj.length,i = 0;
@@ -40,7 +51,12 @@
 			       if(false === fn.call(obj[i],i+1,obj[i])){break;}
 			    }
 			}
+		},
+		noConflict: function(){
+			root.mTools = previousMTools;
+			return this;
 		}
+
 	};
 
 
@@ -104,7 +120,46 @@
 	/*
 	 * url
 	 */
-	var urlParse = {};
+	var urlParse = {
+		createLink: function (url){
+			var aUrl = url;
+			if(!aUrl || aUrl === ''){
+				aUrl = location.href;
+			}
+			var a = document.createElement('a');
+			a.href = aUrl;
+			return {
+				source: aUrl,
+		        protocol: a.protocol.replace(':',''),
+		        host: a.hostname,
+		        port: a.port,
+		        query: a.search,
+		        params: (function(){
+		            var ret = {},
+		                seg = a.search.replace(/^\?/,'').split('&'),
+		                len = seg.length, i = 0, s;
+		            for (;i<len;i++) {
+		                if (!seg[i]) { continue; }
+		                s = seg[i].split('=');
+		                ret[s[0]] = s[1];
+		            }
+		            return ret;
+		        })(),
+		        file: (a.pathname.match(/\/([^\/?#]+)$/i) || [,''])[1],
+		        hash: a.hash.replace('#',''),
+		        path: a.pathname.replace(/^([^\/])/,'/$1'),
+		        relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [,''])[1],
+		        segments: a.pathname.replace(/^\//,'').split('/')
+			}
+		},
+		getHash: function (){
+
+		},
+		getSearch: function(){
+
+		}
+
+	};
 
 	/*
 	 * cookie
@@ -181,7 +236,8 @@
 		setCookie: cookie.setCookie,
 		getCookie: cookie.getCookie,
 		/*load*/
-		imgLoader: loader.imgLoader
+		imgLoader: loader.imgLoader,
+		noConflict: base.noConflict
 	};
 
 	return mTools;
