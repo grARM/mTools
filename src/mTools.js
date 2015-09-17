@@ -7,17 +7,35 @@
 		// AMD. Register as an anonymous module.
 		define(factory);
 	} else {
-
+		 
 		// Browser globals
 		mTools = factory();
 	}
 })(function(){
+	var root = this;
+	var previousMTools = root.mTools;
 	/*
 	 * 基础通用方法
 	 */
 	var base = {
+		/*tpye*/
 		isArray: function(arr){
 			return Object.prototype.toString.call(arr) === '[object Array]';
+		},
+		isFunction: function(fn){
+			return (fn && typeof fn === "function") || false;
+		},
+		isObject: function(obj){
+			var type = typeof obj;
+    		return type === 'function' || type === 'object' && !!obj;
+		},
+		/*type Change*/
+		toInt: function(value){
+			// return ~~(value);
+			return (value) | 0;
+		},
+		toBool: function(value){
+			return !!(value);
 		},
 		each: function (obj, fn){
 			var len = obj.length,i = 0;
@@ -33,8 +51,14 @@
 			       if(false === fn.call(obj[i],i+1,obj[i])){break;}
 			    }
 			}
+		},
+		noConflict: function(){
+			root.mTools = previousMTools;
+			return this;
 		}
+
 	};
+
 
 	/*
 	 * 正则相关方法
@@ -70,17 +94,95 @@
 	 */
 	var browser = {
 		isIos: function(){
-			return navigator.userAgent.indexOf("iPhone")>=0 ? true: false;
+			return (navigator.userAgent.indexOf("iPhone") === -1) ? false: true;
+		},
+		isAndroid: function(){
+			return (window.navigator.userAgent.toLowerCase().indexOf("android") === -1) ? false : true;
+		},
+		isBrowser: function(browserUAName){
+			return (window.navigator.userAgent.toLowerCase().indexOf(browserUAName) === -1) ? false: true;
 		},
 		isWeiXin: function(){
-			return /micromessenger/i.test(navigator.userAgent.toLowerCase());
+			//return /micromessenger/i.test(navigator.userAgent.toLowerCase());
+			return this.isBrowser("micromessenger");
+		},
+		isUC: function(){
+			return this.isBrowser("ucbrowser");
+		},
+		isQQ: function(){
+			return this.isBrowser("mqqbrowser");
+		},
+		isSafari: function(){
+			return this.isBrowser("Safari");
 		}
 	};
 
 	/*
 	 * url
 	 */
-	var urlParse = {};
+	var urlParse = {
+		createLink: function (url){
+			var aUrl = url;
+			if(!aUrl || aUrl === ''){
+				aUrl = location.href;
+			}
+			var a = document.createElement('a');
+			a.href = aUrl;
+			return {
+				source: aUrl,
+		        protocol: a.protocol.replace(':',''),
+		        host: a.hostname,
+		        port: a.port,
+		        query: a.search,
+		        params: (function(){
+		            var ret = {},
+		                seg = a.search.replace(/^\?/,'').split('&'),
+		                len = seg.length, i = 0, s;
+		            for (;i<len;i++) {
+		                if (!seg[i]) { continue; }
+		                s = seg[i].split('=');
+		                ret[s[0]] = s[1];
+		            }
+		            return ret;
+		        })(),
+		        file: (a.pathname.match(/\/([^\/?#]+)$/i) || [,''])[1],
+		        hash: a.hash.replace('#',''),
+		        path: a.pathname.replace(/^([^\/])/,'/$1'),
+		        relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [,''])[1],
+		        segments: a.pathname.replace(/^\//,'').split('/')
+			}
+		},
+		getHash: function (){
+
+		},
+		getSearch: function(){
+
+		}
+
+	};
+
+	/*
+	 * cookie
+	 */
+	var cookie = {
+		setCookie: function (key, value, expiredays){
+			var exdate=new Date();
+			exdate.setDate(exdate.getDate()+expiredays);
+			document.cookie=key+ "=" +escape(value)+((expiredays === null) ? "" : ";expires="+exdate.toGMTString());
+		},
+		getCookie: function(key){
+			if (document.cookie.length > 0) {
+			    c_start = document.cookie.indexOf(key + "=");
+			    if (c_start != -1) {
+			        c_start = c_start + key.length + 1;
+			        c_end = document.cookie.indexOf(";", c_start);
+			        if (c_end == -1) c_end = document.cookie.length;
+			        return unescape(document.cookie.substring(c_start, c_end));
+			    }
+			}
+			return "";
+		}
+	};
 
 	/*
 	 * load
@@ -98,11 +200,13 @@
 						var imgD = document.body.appendChild(imgItem);
 						imgD.onload = function(){
 							count += 1;
-							cb && cb({
-								"count": count,
-								"length": imgsLen,
-								"img": v_img
-							});
+							if(base.isFunction(cb)){
+								cb({
+									"count": count,
+									"length": imgsLen,
+									"img": v_img
+								});
+							}
 							imgD.parentNode.removeChild(imgD); 
 						};
 					})(v_img, i_img);
@@ -126,9 +230,14 @@
 		isNumber: regCheck.isNumber,
 		/*browser*/
 		isIos: browser.isIos,
-		isWeiXin: browser.isWeiXin,
+		isAndroid: browser.isAndroid,
+		Browser: browser,
+		/*cookie*/
+		setCookie: cookie.setCookie,
+		getCookie: cookie.getCookie,
 		/*load*/
-		imgLoader: loader.imgLoader
+		imgLoader: loader.imgLoader,
+		noConflict: base.noConflict
 	};
 
 	return mTools;
