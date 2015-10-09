@@ -19,15 +19,41 @@
 	 */
 	var base = {
 		/*tpye*/
-		isArray: function(arr){
+		isArray: function (arr){
 			return Object.prototype.toString.call(arr) === '[object Array]';
 		},
-		isFunction: function(fn){
+		isFunction: function (fn){
 			return (fn && typeof fn === "function") || false;
 		},
-		isObject: function(obj){
+		isObject: function (obj){
 			var type = typeof obj;
     		return type === 'function' || type === 'object' && !!obj;
+		},
+		/**
+		 * Object
+		 */
+		hasKey: function(obj, key){
+			return obj !== null && hasOwnProperty.call(obj, key);
+		},
+		getKeys: function (obj){
+			if(!this.isObject(obj)){return [];}
+			var keys = [];
+			for (var key in obj){
+				if(this.hasKeys(obj, key)){
+					keys.push(key);
+				}
+			}
+			return keys;
+		},
+		isEmpty: function (obj){
+			if (obj === null) return true;
+			if (this.isArray(obj)){
+				return obj.length === 0;
+			}else if(this.isObject(obj)){
+				return this.getKeys(obj).length === 0;
+			}else{
+				return false;
+			}
 		},
 		/*type Change*/
 		toInt: function(value){
@@ -221,7 +247,15 @@
 	 */
 	var mTools = {
 		/*base*/
+		toBool: base.toBool,
+		toInt: base.toInt,
 		isArray: base.isArray,
+		isFunction: base.isFunction,
+		isObject: base.isObject,
+		isEmpty: base.isEmpty,
+		hasKeys: base.hasKeys,
+		getKeys: base.getKeys,
+
 		each: base.each,
 		/*reg*/
 		isIdcard: regCheck.isIdcard,
