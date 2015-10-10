@@ -45,6 +45,16 @@
 			}
 			return keys;
 		},
+		getSize: function(obj){
+			if (obj == null) return 0;
+			if(this.isArray(obj)){
+				return obj.length;
+			}else if(this.isObject){
+				return this.getKeys(obj).length;
+			}else{
+				return 0;
+			}
+		},
 		getValues: function (obj){
 			if(!this.isObject(obj)){return [];}
 			var values = [];
