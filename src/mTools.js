@@ -45,6 +45,16 @@
 			}
 			return keys;
 		},
+		getValues: function (obj){
+			if(!this.isObject(obj)){return [];}
+			var values = [];
+			for (var key in obj){
+				if(this.hasKeys(obj, key)){
+					values.push(obj[key]);
+				}
+			}
+			return values;
+		},
 		isEmpty: function (obj){
 			if (obj === null) return true;
 			if (this.isArray(obj)){
@@ -69,12 +79,14 @@
 			if(this.isArray(obj)){
 				//如果是数组
 				for(; i<len; i++){
-			       if ( false === fn.call(obj[i], obj[i], i) ){break;}
+			       	if ( false === fn.call(obj[i], obj[i], i) ){break;}
 			    }
 			}else{
 				//如果是对象
 			    for( i in obj ){
-			       if(false === fn.call(obj[i],i+1,obj[i])){break;}
+			    	if(this.hasKeys(obj, i)){
+			    		if(false === fn.call(obj[i],i+1,obj[i])){break;}
+			    	}
 			    }
 			}
 		},
