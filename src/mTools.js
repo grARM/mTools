@@ -23,7 +23,8 @@
 			return Object.prototype.toString.call(arr) === '[object Array]';
 		},
 		isFunction: function (fn){
-			return (fn && typeof fn === "function") || false;
+			return Object.prototype.toString.call(fn) === '[Object Function]';
+			//return (fn && typeof fn === "function") || false;
 		},
 		isObject: function (obj){
 			var type = typeof obj;
@@ -74,6 +75,32 @@
 			}else{
 				return false;
 			}
+		},
+		merge: function(root){
+			for(var i = 1; i < arguments.length; i++){
+				for(var key in arguments[i]){
+					root[key] = arguments[i][key];
+				}
+			}
+			return root;
+		},
+		/* array*/
+		maxInArray: function(arr){
+			return Math.max.apply(Math, arr);
+		},
+		minInArray: function(arr){
+			return Math.min.apply(Math, arr);
+		},
+		/*function*/
+		overload: function(object, name, fn){
+			var old = object[name];
+			object[name] = function(){
+				if(fn.length == arguments.length){
+					return fn.apply(this, arguments);
+				}else if(typeof old == 'function'){
+					return old.apply(this, arguments);
+				}
+			};
 		},
 		/*type Change*/
 		toInt: function(value){
@@ -264,6 +291,27 @@
 		}
 	};
 
+	/**
+	 * template
+	 */
+	var template = {
+		tmpl: function(str, data){
+		    var fn = new Function("obj", "var p=[];"+
+		                 "with(obj){p.push('" +
+		                 str
+		                    .replace(/[\r\t\n]/g, " ")
+		                    .replace(/'/g, "\r") //全部单引号替换为\r
+		                    .split("<%").join("\t") 
+		                    .replace(/\t=(.*?)%>/g, "',$1,'")
+		                    .split("\t").join("');")
+		                    .split("%>").join("p.push('")
+		                    .replace(/\r/g, "\\'")           // 置换回单引号
+		                 + "');}return p.join('');");
+		 
+		    return data ? fn( data ) : fn;
+		}
+	}
+
 	/****************************************************************
 	 * public
 	 */
@@ -293,6 +341,7 @@
 		getCookie: cookie.getCookie,
 		/*load*/
 		imgLoader: loader.imgLoader,
+		template: template.tmpl,
 		noConflict: base.noConflict
 	};
 
