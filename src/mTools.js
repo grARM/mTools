@@ -127,6 +127,18 @@
 			    }
 			}
 		},
+		objParmasCheck: function(str, context){
+			var pointIndex = str.indexOf('.');
+			if(!context){context = window;}
+
+			if(pointIndex == -1 && !(!context[str])){
+				return true;
+			}else{
+				var paramsLeft = context[str.slice(0, pointIndex)];
+				var strRight = str.substr(pointIndex + 1, str.length - pointIndex - 1);
+				return !(!paramsLeft) && base.objParmasCheck(strRight, paramsLeft);
+			}
+		},
 		noConflict: function(){
 			root.mTools = previousMTools;
 			return this;
@@ -325,7 +337,7 @@
 		isEmpty: base.isEmpty,
 		hasKeys: base.hasKeys,
 		getKeys: base.getKeys,
-
+		objParmasCheck: base.objParmasCheck,
 		each: base.each,
 		/*reg*/
 		isIdcard: regCheck.isIdcard,
