@@ -180,28 +180,18 @@
 	 * 浏览器相关方法
 	 */
 	var browser = {
-		isIos: function(){
-			return (navigator.userAgent.indexOf("iPhone") === -1) ? false: true;
-		},
-		isAndroid: function(){
-			return (window.navigator.userAgent.toLowerCase().indexOf("android") === -1) ? false : true;
-		},
+		browsers: [],
 		isBrowser: function(browserUAName){
-			return (window.navigator.userAgent.toLowerCase().indexOf(browserUAName) === -1) ? false: true;
+			return base.hasKey(browser.browsers, browserUAName)? 
+			browser.browsers[browserUAName] : 
+			browser.browsers[browserUAName] = (window.navigator.userAgent.toLowerCase().indexOf(browserUAName) === -1) ? false: true;
 		},
-		isWeiXin: function(){
-			//return /micromessenger/i.test(navigator.userAgent.toLowerCase());
-			return this.isBrowser("micromessenger");
-		},
-		isUC: function(){
-			return this.isBrowser("ucbrowser");
-		},
-		isQQ: function(){
-			return this.isBrowser("mqqbrowser");
-		},
-		isSafari: function(){
-			return this.isBrowser("Safari");
-		}
+		isIos: function(){return browser.isBrowser('iphone');},
+		isAndroid: function(){return browser.isBrowser('android');},
+		isWeiXin: function(){return browser.isBrowser('micromessenger');},
+		isUC: function(){return browser.isBrowser('ucbrowser');},
+		isQQ: function(){return browser.isBrowser('mqqbrowser');},
+		isSafari: function(){return browser.isBrowser('safari');}
 	};
 
 	/*
@@ -345,9 +335,12 @@
 		isMobile: regCheck.isMobilePhone,
 		isNumber: regCheck.isNumber,
 		/*browser*/
+		isQQ: browser.isQQ,
 		isIos: browser.isIos,
 		isAndroid: browser.isAndroid,
-		Browser: browser,
+		isSafari: browser.isSafari,
+		isUC: browser.isUC,
+		isWeiXin: browser.isWeiXin,
 		/*cookie*/
 		setCookie: cookie.setCookie,
 		getCookie: cookie.getCookie,
