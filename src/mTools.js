@@ -151,24 +151,57 @@
 	 * 正则相关方法
 	 */
 	var regCheck = {
-		'isIdcard': function(strId){
-            var patrn = /^\s*\d{15}\s*$/;
-            var patrn1 = /^\s*\d{16}[\dxX]{2}\s*$/;
-            if(!patrn.exec(strId) && !patrn1.exec(strId)){return false;}
-            return true;
+		regMap: {
+			Idcard: [
+				/^\s*\d{15}\s*$/, 
+				/^\s*\d{16}[\dxX]{2}\s*$/
+			],
+			name: [ 
+				/^\s*[\u4e00-\u9fa5]{1,}[\u4e00-\u9fa5.·]{0,15}[\u4e00-\u9fa5]{1,}\s*$/ 
+			],
+			mobilePhone: [
+				/^[1][0-9]{10}$/
+			],
+			number: [
+				/^[0-9]*$/
+			]
+		},
+		regFuns: {},
+		isType: function(type){
+			return base.hasKey(regCheck.regFuns, 'type') ? 
+				regCheck.regFuns[type] : 
+				regCheck.regFuns[type] = (function (type){
+					return base.hasKey(regCheck.regMap, type) ?
+						function (str){
+							var res = false;
+							var patrns = regCheck.regMap[type];
+							base.each(patrns, function (v_p, i_p){
+								if(v_p.exec(str)){
+									res = true;
+									return false;
+								}
+							});
+							return res;
+						} : 
+						function(){
+							return false;
+						};
+				})(type);
+
+			if(base.hasKey(regCheck.regMap, type)){
+				var patrns = regCheck.regMap[type];
+			}else{return false;}
+		},
+		isIdcard: function(strId){
+         	return regCheck.isType('Idcard')(strId);
         },
-        'isName': function(strName){
-            var onlyName = strName.split('·').join('');
-            var patrn = /^\s*[\u4e00-\u9fa5]{1,}[\u4e00-\u9fa5.·]{0,15}[\u4e00-\u9fa5]{1,}\s*$/; 
-            if(!patrn.exec(onlyName)){return false;}
-            return true;
+        isName: function(strName){
+            return regCheck.isType('name')(strName.split('·').join(''))
         },
-        'isMobilePhone': function(strPhone){
-            var  patrn = /^[1][0-9]{10}$/;
-            if(!patrn.exec(strPhone)){return false;}
-            return true;
+        isMobilePhone: function(strPhone){
+            return regCheck.isType('mobilePhone')(strPhone);
         },
-        'isNumber': function(strNumber){
+        isNumber: function(strNumber){
         	var patrn = /^[0-9]*$/;
         	if(!patrn.exec(strNumber)){return false;}
         	return true;
@@ -180,7 +213,7 @@
 	 * 浏览器相关方法
 	 */
 	var browser = {
-		browsers: [],
+		browsers: {},
 		isBrowser: function(browserUAName){
 			return base.hasKey(browser.browsers, browserUAName)? 
 			browser.browsers[browserUAName] : 
