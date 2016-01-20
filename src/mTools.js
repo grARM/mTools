@@ -23,7 +23,8 @@
 			return (Array && Array.isArray) ? Array.isArray(arr) : Object.prototype.toString.call(arr) === '[object Array]';
 		},
 		isFunction: function (fn){
-			return (fn && typeof fn === "function") || false;
+			return Object.prototype.toString.call(fn) === '[Object Function]';
+			//return (fn && typeof fn === "function") || false;
 		},
 		isObject: function (obj){
 			var type = typeof obj;
@@ -75,6 +76,32 @@
 				return false;
 			}
 		},
+		merge: function(root){
+			for(var i = 1; i < arguments.length; i++){
+				for(var key in arguments[i]){
+					root[key] = arguments[i][key];
+				}
+			}
+			return root;
+		},
+		/* array*/
+		maxInArray: function(arr){
+			return Math.max.apply(Math, arr);
+		},
+		minInArray: function(arr){
+			return Math.min.apply(Math, arr);
+		},
+		/*function*/
+		overload: function(object, name, fn){
+			var old = object[name];
+			object[name] = function(){
+				if(fn.length == arguments.length){
+					return fn.apply(this, arguments);
+				}else if(typeof old == 'function'){
+					return old.apply(this, arguments);
+				}
+			};
+		},
 		/*type Change*/
 		toInt: function(value){
 			// return ~~(value);
@@ -100,6 +127,18 @@
 			    }
 			}
 		},
+		objParmasCheck: function(str, context){
+			var pointIndex = str.indexOf('.');
+			if(!context){context = window;}
+
+			if(pointIndex == -1 && !(!context[str])){
+				return true;
+			}else{
+				var paramsLeft = context[str.slice(0, pointIndex)];
+				var strRight = str.substr(pointIndex + 1, str.length - pointIndex - 1);
+				return !(!paramsLeft) && base.objParmasCheck(strRight, paramsLeft);
+			}
+		},
 		noConflict: function(){
 			root.mTools = previousMTools;
 			return this;
@@ -112,24 +151,57 @@
 	 * 正则相关方法
 	 */
 	var regCheck = {
-		'isIdcard': function(strId){
-            var patrn = /^\s*\d{15}\s*$/;
-            var patrn1 = /^\s*\d{16}[\dxX]{2}\s*$/;
-            if(!patrn.exec(strId) && !patrn1.exec(strId)){return false;}
-            return true;
+		regMap: {
+			Idcard: [
+				/^\s*\d{15}\s*$/, 
+				/^\s*\d{16}[\dxX]{2}\s*$/
+			],
+			name: [ 
+				/^\s*[\u4e00-\u9fa5]{1,}[\u4e00-\u9fa5.·]{0,15}[\u4e00-\u9fa5]{1,}\s*$/ 
+			],
+			mobilePhone: [
+				/^[1][0-9]{10}$/
+			],
+			number: [
+				/^[0-9]*$/
+			]
+		},
+		regFuns: {},
+		isType: function(type){
+			return base.hasKey(regCheck.regFuns, 'type') ? 
+				regCheck.regFuns[type] : 
+				regCheck.regFuns[type] = (function (type){
+					return base.hasKey(regCheck.regMap, type) ?
+						function (str){
+							var res = false;
+							var patrns = regCheck.regMap[type];
+							base.each(patrns, function (v_p, i_p){
+								if(v_p.exec(str)){
+									res = true;
+									return false;
+								}
+							});
+							return res;
+						} : 
+						function(){
+							return false;
+						};
+				})(type);
+
+			if(base.hasKey(regCheck.regMap, type)){
+				var patrns = regCheck.regMap[type];
+			}else{return false;}
+		},
+		isIdcard: function(strId){
+         	return regCheck.isType('Idcard')(strId);
         },
-        'isName': function(strName){
-            var onlyName = strName.split('·').join('');
-            var patrn = /^\s*[\u4e00-\u9fa5]{1,}[\u4e00-\u9fa5.·]{0,15}[\u4e00-\u9fa5]{1,}\s*$/; 
-            if(!patrn.exec(onlyName)){return false;}
-            return true;
+        isName: function(strName){
+            return regCheck.isType('name')(strName.split('·').join(''))
         },
-        'isMobilePhone': function(strPhone){
-            var  patrn = /^[1][0-9]{10}$/;
-            if(!patrn.exec(strPhone)){return false;}
-            return true;
+        isMobilePhone: function(strPhone){
+            return regCheck.isType('mobilePhone')(strPhone);
         },
-        'isNumber': function(strNumber){
+        isNumber: function(strNumber){
         	var patrn = /^[0-9]*$/;
         	if(!patrn.exec(strNumber)){return false;}
         	return true;
@@ -141,28 +213,18 @@
 	 * 浏览器相关方法
 	 */
 	var browser = {
-		isIos: function(){
-			return (navigator.userAgent.indexOf("iPhone") === -1) ? false: true;
-		},
-		isAndroid: function(){
-			return (window.navigator.userAgent.toLowerCase().indexOf("android") === -1) ? false : true;
-		},
+		browsers: {},
 		isBrowser: function(browserUAName){
-			return (window.navigator.userAgent.toLowerCase().indexOf(browserUAName) === -1) ? false: true;
+			return base.hasKey(browser.browsers, browserUAName)? 
+			browser.browsers[browserUAName] : 
+			browser.browsers[browserUAName] = (window.navigator.userAgent.toLowerCase().indexOf(browserUAName) === -1) ? false: true;
 		},
-		isWeiXin: function(){
-			//return /micromessenger/i.test(navigator.userAgent.toLowerCase());
-			return browser.isBrowser("micromessenger");
-		},
-		isUC: function(){
-			return browser.isBrowser("ucbrowser");
-		},
-		isQQ: function(){
-			return browser.isBrowser("mqqbrowser");
-		},
-		isSafari: function(){
-			return browser.isBrowser("Safari");
-		}
+		isIos: function(){return browser.isBrowser('iphone');},
+		isAndroid: function(){return browser.isBrowser('android');},
+		isWeiXin: function(){return browser.isBrowser('micromessenger');},
+		isUC: function(){return browser.isBrowser('ucbrowser');},
+		isQQ: function(){return browser.isBrowser('mqqbrowser');},
+		isSafari: function(){return browser.isBrowser('safari');}
 	};
 
 	/*
@@ -264,6 +326,27 @@
 		}
 	};
 
+	/**
+	 * template
+	 */
+	var template = {
+		tmpl: function(str, data){
+		    var fn = new Function("obj", "var p=[];"+
+		                 "with(obj){p.push('" +
+		                 str
+		                    .replace(/[\r\t\n]/g, " ")
+		                    .replace(/'/g, "\r") //全部单引号替换为\r
+		                    .split("<%").join("\t") 
+		                    .replace(/\t=(.*?)%>/g, "',$1,'")
+		                    .split("\t").join("');")
+		                    .split("%>").join("p.push('")
+		                    .replace(/\r/g, "\\'")           // 置换回单引号
+		                 + "');}return p.join('');");
+		 
+		    return data ? fn( data ) : fn;
+		}
+	}
+
 	/****************************************************************
 	 * public
 	 */
@@ -277,7 +360,7 @@
 		isEmpty: base.isEmpty,
 		hasKey: base.hasKey,
 		getKeys: base.getKeys,
-
+		objParmasCheck: base.objParmasCheck,
 		each: base.each,
 		/*reg*/
 		isIdcard: regCheck.isIdcard,
@@ -285,14 +368,18 @@
 		isMobile: regCheck.isMobilePhone,
 		isNumber: regCheck.isNumber,
 		/*browser*/
+		isQQ: browser.isQQ,
 		isIos: browser.isIos,
 		isAndroid: browser.isAndroid,
-		Browser: browser,
+		isSafari: browser.isSafari,
+		isUC: browser.isUC,
+		isWeiXin: browser.isWeiXin,
 		/*cookie*/
 		setCookie: cookie.setCookie,
 		getCookie: cookie.getCookie,
 		/*load*/
 		imgLoader: loader.imgLoader,
+		template: template.tmpl,
 		noConflict: base.noConflict
 	};
 
