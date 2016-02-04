@@ -20,7 +20,7 @@
 	var base = {
 		/*tpye*/
 		isArray: function (arr){
-			return Object.prototype.toString.call(arr) === '[object Array]';
+			return (Array && Array.isArray) ? Array.isArray(arr) : Object.prototype.toString.call(arr) === '[object Array]';
 		},
 		isFunction: function (fn){
 			return Object.prototype.toString.call(fn) === '[Object Function]';
@@ -37,10 +37,10 @@
 			return obj !== null && hasOwnProperty.call(obj, key);
 		},
 		getKeys: function (obj){
-			if(!this.isObject(obj)){return [];}
+			if(!base.isObject(obj)){return [];}
 			var keys = [];
 			for (var key in obj){
-				if(this.hasKeys(obj, key)){
+				if(base.hasKey(obj, key)){
 					keys.push(key);
 				}
 			}
@@ -50,17 +50,17 @@
 			if (obj === null) return 0;
 			if(this.isArray(obj)){
 				return obj.length;
-			}else if(this.isObject){
-				return this.getKeys(obj).length;
+			}else if(base.isObject){
+				return base.getKeys(obj).length;
 			}else{
 				return 0;
 			}
 		},
 		getValues: function (obj){
-			if(!this.isObject(obj)){return [];}
+			if(!base.isObject(obj)){return [];}
 			var values = [];
 			for (var key in obj){
-				if(this.hasKeys(obj, key)){
+				if(base.hasKey(obj, key)){
 					values.push(obj[key]);
 				}
 			}
@@ -68,10 +68,10 @@
 		},
 		isEmpty: function (obj){
 			if (obj === null) return true;
-			if (this.isArray(obj)){
+			if (base.isArray(obj)){
 				return obj.length === 0;
-			}else if(this.isObject(obj)){
-				return this.getKeys(obj).length === 0;
+			}else if(base.isObject(obj)){
+				return base.getKeys(obj).length === 0;
 			}else{
 				return false;
 			}
@@ -113,7 +113,7 @@
 		each: function (obj, fn){
 			var len = obj.length,i = 0;
 
-			if(this.isArray(obj)){
+			if(base.isArray(obj)){
 				//如果是数组
 				for(; i<len; i++){
 			       	if ( false === fn.call(obj[i], obj[i], i) ){break;}
@@ -121,7 +121,7 @@
 			}else{
 				//如果是对象
 			    for( i in obj ){
-			    	if(this.hasKeys(obj, i)){
+			    	if(base.hasKey(obj, i)){
 			    		if(false === fn.call(obj[i],i+1,obj[i])){break;}
 			    	}
 			    }
@@ -187,10 +187,6 @@
 							return false;
 						};
 				})(type);
-
-			// if(base.hasKey(regCheck.regMap, type)){
-			// 	var patrns = regCheck.regMap[type];
-			// }else{return false;}
 		},
 		isIdcard: function(strId){
          	return regCheck.isType('Idcard')(strId);
@@ -365,7 +361,7 @@
 		isFunction: base.isFunction,
 		isObject: base.isObject,
 		isEmpty: base.isEmpty,
-		hasKeys: base.hasKeys,
+		hasKey: base.hasKey,
 		getKeys: base.getKeys,
 		objParmasCheck: base.objParmasCheck,
 		each: base.each,
