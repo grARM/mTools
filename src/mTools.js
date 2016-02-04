@@ -47,7 +47,7 @@
 			return keys;
 		},
 		getSize: function(obj){
-			if (obj == null) return 0;
+			if (obj === null) return 0;
 			if(this.isArray(obj)){
 				return obj.length;
 			}else if(this.isObject){
@@ -168,7 +168,7 @@
 		},
 		regFuns: {},
 		isType: function(type){
-			return base.hasKey(regCheck.regFuns, 'type') ? 
+			return base.hasKey(regCheck.regFuns, type) ? 
 				regCheck.regFuns[type] : 
 				regCheck.regFuns[type] = (function (type){
 					return base.hasKey(regCheck.regMap, type) ?
@@ -188,15 +188,15 @@
 						};
 				})(type);
 
-			if(base.hasKey(regCheck.regMap, type)){
-				var patrns = regCheck.regMap[type];
-			}else{return false;}
+			// if(base.hasKey(regCheck.regMap, type)){
+			// 	var patrns = regCheck.regMap[type];
+			// }else{return false;}
 		},
 		isIdcard: function(strId){
          	return regCheck.isType('Idcard')(strId);
         },
         isName: function(strName){
-            return regCheck.isType('name')(strName.split('·').join(''))
+            return regCheck.isType('name')(strName.split('·').join(''));
         },
         isMobilePhone: function(strPhone){
             return regCheck.isType('mobilePhone')(strPhone);
@@ -205,6 +205,13 @@
         	var patrn = /^[0-9]*$/;
         	if(!patrn.exec(strNumber)){return false;}
         	return true;
+        },
+        removeUint: function(str, unit){
+        	if(unit){
+        		return str.replace(unit, '') || str;
+        	}else{
+        		return str.replace(/[^0-9.]/gi, '') || str;
+        	}
         }
 	};
 
@@ -260,7 +267,7 @@
 		        path: a.pathname.replace(/^([^\/])/,'/$1'),
 		        relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [,''])[1],
 		        segments: a.pathname.replace(/^\//,'').split('/')
-			}
+			};
 		},
 		getHash: function (){
 
@@ -340,12 +347,12 @@
 		                    .replace(/\t=(.*?)%>/g, "',$1,'")
 		                    .split("\t").join("');")
 		                    .split("%>").join("p.push('")
-		                    .replace(/\r/g, "\\'")           // 置换回单引号
-		                 + "');}return p.join('');");
+		                    .replace(/\r/g, "\\'") +           // 置换回单引号
+		                 "');}return p.join('');");
 		 
 		    return data ? fn( data ) : fn;
 		}
-	}
+	};
 
 	/****************************************************************
 	 * public
@@ -367,6 +374,7 @@
 		isName: regCheck.isName,
 		isMobile: regCheck.isMobilePhone,
 		isNumber: regCheck.isNumber,
+		removeUint: regCheck.removeUint,
 		/*browser*/
 		isQQ: browser.isQQ,
 		isIos: browser.isIos,
